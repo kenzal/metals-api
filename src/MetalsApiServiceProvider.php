@@ -5,7 +5,6 @@ namespace Kenzal\MetalsApi;
 use Illuminate\Contracts\Support\DeferrableProvider;
 use Spatie\LaravelPackageTools\Package;
 use Spatie\LaravelPackageTools\PackageServiceProvider;
-use Kenzal\MetalsApi\Commands\MetalsApiCommand;
 
 class MetalsApiServiceProvider extends PackageServiceProvider implements DeferrableProvider
 {
