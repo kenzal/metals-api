@@ -5,6 +5,11 @@ namespace Kenzal\MetalsApi;
 use DateTime;
 use Illuminate\Http\Client\RequestException;
 use Illuminate\Support\Facades\Http;
+use Kenzal\MetalsApi\Contracts\SymbolInterface;
+use Kenzal\MetalsApi\Exceptions\InvalidConfigException;
+use Kenzal\MetalsApi\Symbols\Currency;
+use Kenzal\MetalsApi\Symbols\Metal;
+use Kenzal\MetalsApi\Symbols\UnknownSymbol;
 
 class MetalsApi
 {
@@ -55,6 +60,7 @@ class MetalsApi
      *
      * The Metals-API API comes with a constantly updated endpoint returning all available currencies.
      *
+     * @return SymbolInterface[]
      * @throws RequestException
      */
     public function symbols(): array
@@ -64,8 +70,15 @@ class MetalsApi
         if ($response->failed()) {
             throw $response->toException();
         }
+        $symbols = $response->json(null, []);
 
-        return $response->json(null, []);
+        return array_map(
+            function(string $symbol, string $description) {
+                return Metal::tryFrom($symbol) ?? Currency::tryFrom($symbol) ?? new UnknownSymbol($symbol, $description);
+            },
+            array_keys($symbols),
+            array_values($symbols)
+        );
     }
 
     /**
@@ -74,19 +87,19 @@ class MetalsApi
      * Depending on your subscription plan, the API's latest endpoint will return real-time exchange rate data updated
      * every 60 minutes, every 10 minutes or every 60 seconds.
      *
-     * @param  string|string[]|null  $symbols  array or comma-separated string of currency codes or metal codes to limit output codes, empty string for all
-     * @param  string|null  $base  The three-letter currency code or metal code of your preferred base currency.
+     * @param  string|string[]|SymbolInterface[]|SymbolInterface|null  $symbols  array or comma-separated string of currency codes or metal codes to limit output codes, empty string for all
+     * @param  string|SymbolInterface|null  $base  The three-letter currency code or metal code of your preferred base currency.
      * @return array
      *
      * @throws RequestException
      */
-    public function latest(string|array $symbols = null, string $base = null): array
+    public function latest(string|array|SymbolInterface $symbols = null, string|SymbolInterface $base = null): array
     {
-        $symbols = ($symbols === null) ? $this->config['symbols'] ?? '' : '';
-        $symbols = is_array($symbols) ? implode(',', $symbols) : $symbols;
-        $base = ($base === null) ? $this->config['base'] : '';
+        $symbols = $this->symbolsToString($symbols);
+        $base    = ($base === null) ? $this->config['base'] : '';
+        $base = $base instanceof SymbolInterface ? $base->getSymbol() : $base;
 
-        $url = $this->buildURL('latest', ['base' => $base, 'symbols' => $symbols]);
+        $url      = $this->buildURL('latest', ['base' => $base, 'symbols' => $symbols]);
         $response = Http::get($url);
         if ($response->failed()) {
             throw $response->toException();
@@ -101,17 +114,17 @@ class MetalsApi
      * Historical rates are available for most currencies all the way back to the year of 2019.
      *
      * @param  DateTime  $date  Date for historical data retrieval
-     * @param  string|string[]|null  $symbols  array or comma-separated string of currency codes or metal codes to limit output codes, empty string for all
-     * @param  string|null  $base  The three-letter currency code or metal code of your preferred base currency.
+     * @param  string|string[]|SymbolInterface[]|SymbolInterface|null  $symbols  array or comma-separated string of currency codes or metal codes to limit output codes, empty string for all
+     * @param  string|SymbolInterface|null  $base  The three-letter currency code or metal code of your preferred base currency.
      * @return array
      *
      * @throws RequestException
      */
-    public function historical(DateTime $date, string|array $symbols = null, string $base = null): array
+    public function historical(DateTime $date, string|array|SymbolInterface $symbols = null, string|SymbolInterface $base = null): array
     {
-        $symbols = ($symbols === null) ? $this->config['symbols'] ?? '' : '';
-        $symbols = is_array($symbols) ? implode(',', $symbols) : $symbols;
+        $symbols = $this->symbolsToString($symbols);
         $base = ($base === null) ? $this->config['base'] : '';
+        $base = $base instanceof SymbolInterface ? $base->getSymbol() : $base;
 
         $url = $this->buildURL($date->format('Y-m-d'), ['base' => $base, 'symbols' => $symbols]);
         $response = Http::get($url);
@@ -128,16 +141,18 @@ class MetalsApi
      * The Metals-API API comes with a separate currency conversion endpoint, which can be used to convert any amount
      * from one currency to another.
      *
-     * @param  string  $from  The three-letter currency code or metal code of the symbol you would like to convert from
-     * @param  string  $to  The three-letter currency code or metal code or metal code of the currency you would like to convert to
+     * @param  string|SymbolInterface  $from  The three-letter currency code or metal code of the symbol you would like to convert from
+     * @param  string|SymbolInterface  $to  The three-letter currency code or metal code or metal code of the currency you would like to convert to
      * @param  int|float  $amount  The amount to be converted
      * @param  DateTime|null  $date  Specify a date to use historical rates for this conversion
      * @return float
      *
      * @throws RequestException
      */
-    public function convert(string $from, string $to, int|float $amount, DateTime $date = null): float
+    public function convert(string|SymbolInterface $from, string|SymbolInterface $to, int|float $amount, DateTime $date = null): float
     {
+        $from = $from instanceof SymbolInterface ? $from->getSymbol() : $from;
+        $to  = $to instanceof SymbolInterface ? $to->getSymbol() : $to;
         $url = $this->buildURL(
             'convert',
             [
@@ -171,15 +186,17 @@ class MetalsApi
      *
      * @param  DateTime  $startDate  The start date of your preferred timeframe.
      * @param  DateTime  $endDate  The end date of your preferred timeframe.
-     * @param  string  $symbol  The three-letter currency code or metal codes to request
-     * @param  string|null  $base  The three-letter currency code or metal code of your preferred base currency.
+     * @param  string|SymbolInterface  $symbol  The three-letter currency code or metal codes to request
+     * @param  string|SymbolInterface|null  $base  The three-letter currency code or metal code of your preferred base currency.
      * @return array
      *
      * @throws RequestException
      */
-    public function timeSeries(DateTime $startDate, DateTime $endDate, string $symbol, string $base = null): array
+    public function timeSeries(DateTime $startDate, DateTime $endDate, string|SymbolInterface $symbol, string|SymbolInterface $base = null): array
     {
+        $symbol = $symbol instanceof SymbolInterface ? $symbol->getSymbol() : $symbol;
         $base = ($base === null) ? $this->config['base'] : '';
+        $base = $base instanceof SymbolInterface ? $base->getSymbol() : $base;
 
         $url = $this->buildURL(
             'timeseries',
@@ -207,7 +224,7 @@ class MetalsApi
      *
      * @param  DateTime  $startDate  The start date of your preferred timeframe.
      * @param  DateTime  $endDate  The end date of your preferred timeframe.
-     * @param  string|string[]|null  $symbols  array or comma-separated string of currency codes or metal codes to limit output codes, empty string for all
+     * @param  string|string[]|SymbolInterface[]|SymbolInterface|null  $symbols  array or comma-separated string of currency codes or metal codes to limit output codes, empty string for all
      * @param  string|null  $base  The three-letter currency code or metal code of your preferred base currency.
      * @param  string|null  $type  weekly, monthly, yearly
      * @return array
@@ -218,12 +235,12 @@ class MetalsApi
         DateTime $startDate,
         DateTime $endDate,
         string|array $symbols = null,
-        string $base = null,
+        string|SymbolInterface $base = null,
         string $type = null
     ): array {
-        $symbols = ($symbols === null) ? $this->config['symbols'] ?? '' : '';
-        $symbols = is_array($symbols) ? implode(',', $symbols) : $symbols;
+        $symbols = $this->symbolsToString($symbols);
         $base = ($base === null) ? $this->config['base'] : '';
+        $base = $base instanceof SymbolInterface ? $base->getSymbol() : $base;
 
         $url = $this->buildURL(
             'timeseries',
@@ -247,14 +264,15 @@ class MetalsApi
      *
      * Using the Metals-API API's carat endpoint you will be able to retrieve information about Gold rates by Carat.
      *
-     * @param  string|null  $base  The three-letter currency code or metal code of your preferred base currency.
+     * @param  string|SymbolInterface|null  $base  The three-letter currency code or metal code of your preferred base currency.
      * @return array
      *
      * @throws RequestException
      */
-    public function carat(string $base = null): array
+    public function carat(string|SymbolInterface $base = null): array
     {
         $base = ($base === null) ? $this->config['base'] : '';
+        $base = $base instanceof SymbolInterface ? $base->getSymbol() : $base;
         $url = $this->buildURL(
             'carat',
             [
@@ -276,15 +294,17 @@ class MetalsApi
      * This endpoint has a limitation of one symbol per request.
      *
      * @param  DateTime  $date  The start date of your preferred timeframe.
-     * @param  string  $symbol  The three-letter currency code or metal codes to request
-     * @param  string|null  $base  The three-letter currency code or metal code of your preferred base currency.
+     * @param  string|SymbolInterface  $symbol  The three-letter currency code or metal codes to request
+     * @param  string|SymbolInterface|null  $base  The three-letter currency code or metal code of your preferred base currency.
      * @return array
      *
      * @throws RequestException
      */
-    public function lowestHighest(DateTime $date, string $symbol, string $base = null): array
+    public function lowestHighest(DateTime $date, string|SymbolInterface $symbol, string|SymbolInterface $base = null): array
     {
         $base = ($base === null) ? $this->config['base'] : '';
+        $base = $base instanceof SymbolInterface ? $base->getSymbol() : $base;
+        $symbol = $symbol instanceof SymbolInterface ? $symbol->getSymbol() : $symbol;
 
         $url = $this->buildURL(
             "lowest-highest/{$date->format('Y-m-d')}",
@@ -309,15 +329,17 @@ class MetalsApi
      * This endpoint has a limitation of one symbol per request.
      *
      * @param  DateTime  $date  The start date of your preferred timeframe.
-     * @param  string  $symbol  The three-letter currency code or metal codes to request
-     * @param  string|null  $base  The three-letter currency code or metal code of your preferred base currency.
+     * @param  string|SymbolInterface  $symbol  The three-letter currency code or metal codes to request
+     * @param  string|SymbolInterface|null  $base  The three-letter currency code or metal code of your preferred base currency.
      * @return array
      *
      * @throws RequestException
      */
-    public function OHLC(DateTime $date, string $symbol, string $base = null): array
+    public function OHLC(DateTime $date, string|SymbolInterface $symbol, string|SymbolInterface $base = null): array
     {
         $base = ($base === null) ? $this->config['base'] : '';
+        $base = $base instanceof SymbolInterface ? $base->getSymbol() : $base;
+        $symbol = $symbol instanceof SymbolInterface ? $symbol->getSymbol() : $symbol;
 
         $url = $this->buildURL(
             "open-high-low-close/{$date->format('Y-m-d')}",
@@ -342,7 +364,25 @@ class MetalsApi
     }
 
     /**
+     * Cleans up multiple acceptable formats to comma-separated string
+     *
+     * @param  string|string[]|SymbolInterface[]|SymbolInterface|null  $symbols  array or comma-separated string of currency codes or metal codes to limit output codes, empty string for all
+     * @return string
+     */
+    protected function symbolsToString(string|array $symbols = null): string
+    {
+        $symbols = ($symbols === null) ? $this->config['symbols'] ?? '' : '';
+        return is_array($symbols)
+            ? implode(',',
+                      array_map(
+                          fn($symbol) => $symbol instanceof SymbolInterface ? $symbol->getSymbol() : $symbol,
+                          $symbols))
+            : $symbols;
+    }
+
+    /**
      * Check config for required params.
+     * @throws InvalidConfigException
      */
     protected function validateConfig(): void
     {

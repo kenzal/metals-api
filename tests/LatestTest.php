@@ -5,6 +5,8 @@
 use Illuminate\Http\Client\RequestException;
 use Illuminate\Support\Facades\Http;
 use Kenzal\MetalsApi\MetalsApi;
+use Kenzal\MetalsApi\Symbols\Currency;
+use Kenzal\MetalsApi\Symbols\Metal;
 
 it('can get', function () {
     Http::fake([
@@ -26,9 +28,11 @@ it('can get', function () {
     ]);
 
     $metalsApi = new MetalsApi(config('metalsApi'));
-    $rates = $metalsApi->latest('USD,GBP,JPY,EUR,XAU,XAG,BTC', 'BTC');
+    $rates = $metalsApi->latest(['USD','GBP',Currency::JPY,'EUR', Metal::XAU,'XAG','BTC'], Currency::BTC);
 
-    expect($rates['USD'])->toBe(22606.174999998493);
+    expect($rates)->toHaveKey('USD', 22606.174999998493);
+    expect($rates)->toHaveKey('JPY', 2935281.092856604);
+    expect($rates)->toHaveKey('XAU', 0.08532182025486948);
 });
 
 it('throws exception on bad bad response', function () {
