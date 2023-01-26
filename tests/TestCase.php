@@ -8,14 +8,6 @@ use Orchestra\Testbench\TestCase as Orchestra;
 
 class TestCase extends Orchestra
 {
-    protected function setUp(): void
-    {
-        parent::setUp();
-
-        Factory::guessFactoryNamesUsing(
-            fn (string $modelName) => 'Kenzal\\MetalsApi\\Database\\Factories\\'.class_basename($modelName).'Factory'
-        );
-    }
 
     protected function getPackageProviders($app)
     {
@@ -24,13 +16,28 @@ class TestCase extends Orchestra
         ];
     }
 
+    /**
+     * Override application aliases.
+     *
+     * @param  \Illuminate\Foundation\Application  $app
+     *
+     * @return array<string, class-string<\Illuminate\Support\Facades\Facade>>
+     */
+    protected function getPackageAliases($app)
+    {
+        return [
+            'MetalsApi' => 'Kenzal\MetalsApi',
+        ];
+    }
+
     public function getEnvironmentSetUp($app)
     {
-        config()->set('database.default', 'testing');
+        config()->set('metalsApi', [
+            'access_key' => 'RandomAccessKey',
+            'host'       => 'http://localhost',
+            'base'       => env('METALS_API_BASE', 'USD')
+        ]);
 
-        /*
-        $migration = include __DIR__.'/../database/migrations/create_metals-api_table.php.stub';
-        $migration->up();
-        */
+
     }
 }
