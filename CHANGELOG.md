@@ -10,3 +10,7 @@ Additional Documentation including:
 - CODE_OF_CONDUCT.md
 - CONTRIBUTING.md
 - SECURITY.md
+
+## v1.1.0 - 2023-01-26
+
+Updated to make use of Symbol Enums
