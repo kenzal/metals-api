@@ -6,6 +6,13 @@
 [![Total Downloads](https://img.shields.io/packagist/dt/kenzal/metals-api.svg?style=flat-square)](https://packagist.org/packages/kenzal/metals-api)
 
 A laravel package for accessing the api at https://metals-api.com/
+
+## Requirements
+
+In order to use this package, you will need an account with [Metals-API.com](https://metals-api.com/) as this is just a 
+wrapper for their service. Please note that all requests count towards a monthly quota determined by your account level.
+
+
 ## Installation
 
 You can install the package via composer:
@@ -55,7 +62,7 @@ Please see [CONTRIBUTING](CONTRIBUTING.md) for details.
 
 ## Security Vulnerabilities
 
-Please review [our security policy](../../security/policy) on how to report security vulnerabilities.
+Please review [our security policy](SECURITY.md) on how to report security vulnerabilities.
 
 ## Credits
 

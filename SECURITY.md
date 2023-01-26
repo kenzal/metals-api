@@ -12,6 +12,6 @@ currently being supported with security updates.
 
 ## Reporting a Vulnerability
 
-Please report any found vulnerablities on the official [Issues Page](https://github.com/kenzal/metals-api/issues) page. 
+Please report any found vulnerabilities on to [the maintainer](mailto:kenzal.hunter+metals-api@gmail.com).
 
-Any reported vulnerablilitis will be verified and handled swiftly.
+Any reported vulnerabilities will be verified and handled swiftly.

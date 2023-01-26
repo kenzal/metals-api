@@ -65,5 +65,15 @@
         }
     },
     "minimum-stability": "dev",
-    "prefer-stable": true
+    "prefer-stable": true,
+    "funding": [
+        {
+            "type": "github",
+            "url": "https://github.com/sponsors/kenzal"
+        },
+        {
+            "type": "tidelift",
+            "url": "https://tidelift.com/lifter/search/packagist/kenzal%2Fmetals-api"
+        }
+    ]
 }
