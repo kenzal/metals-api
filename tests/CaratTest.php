@@ -1,4 +1,6 @@
-<?php /** @noinspection PhpUnhandledExceptionInspection */
+<?php
+
+/** @noinspection PhpUnhandledExceptionInspection */
 
 use Illuminate\Http\Client\RequestException;
 use Illuminate\Support\Facades\Http;
@@ -6,8 +8,8 @@ use Kenzal\MetalsApi\MetalsApi;
 
 it('can get', function () {
     Http::fake([
-                   '*' => Http::response(
-                       body  : '{
+        '*' => Http::response(
+            body  : '{
                 "success": true,
                 "timestamp": 1623165936,
                 "base": "USD",
@@ -26,13 +28,12 @@ it('can get', function () {
                     "Carat 6K": 3043
                 }
             }',
-                       status: 200
-                   ),
-               ]);
+            status: 200
+        ),
+    ]);
 
     $metalsApi = new MetalsApi(config('metalsApi'));
-    $symbols   = $metalsApi->carat('USD');
-
+    $symbols = $metalsApi->carat('USD');
 
     expect($symbols)->toHaveKey('Carat 24K');
     expect($symbols['Carat 24K'])->toBe(12173);

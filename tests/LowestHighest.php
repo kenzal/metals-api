@@ -1,4 +1,6 @@
-<?php /** @noinspection PhpUnhandledExceptionInspection */
+<?php
+
+/** @noinspection PhpUnhandledExceptionInspection */
 
 use Carbon\Carbon;
 use Illuminate\Http\Client\RequestException;
@@ -7,9 +9,9 @@ use Kenzal\MetalsApi\MetalsApi;
 
 it('can get', function () {
     Http::fake([
-                   '*' => Http::response(
-                   /** @lang JSON */
-                       '{
+        '*' => Http::response(
+            /** @lang JSON */
+            '{
                                 "success": true,
                                 "timestamp": 1641842149,
                                 "date": "2022-01-01",
@@ -21,12 +23,11 @@ it('can get', function () {
                                 },
                                 "unit": "per ounce"
                               }',
-                       200),
-               ]);
+            200),
+    ]);
 
     $metalsApi = new MetalsApi(config('metalsApi'));
-    $rates     = $metalsApi->lowestHighest(date: Carbon::make('2022-01-01'), symbol: 'XAU', base: 'USD');
-
+    $rates = $metalsApi->lowestHighest(date: Carbon::make('2022-01-01'), symbol: 'XAU', base: 'USD');
 
     expect($rates['low'])->toBe(0.0005470547);
 });

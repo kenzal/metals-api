@@ -1,8 +1,10 @@
-<?php /** @noinspection PhpUnhandledExceptionInspection */
+<?php
+
+/** @noinspection PhpUnhandledExceptionInspection */
 
 use Illuminate\Support\Facades\Http;
-use Kenzal\MetalsApi\MetalsApi;
 use Kenzal\MetalsApi\Exceptions;
+use Kenzal\MetalsApi\MetalsApi;
 
 $responseExceptions = [
     // The requested resource does not exist.

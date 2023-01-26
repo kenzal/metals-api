@@ -1,4 +1,6 @@
-<?php /** @noinspection PhpUnhandledExceptionInspection */
+<?php
+
+/** @noinspection PhpUnhandledExceptionInspection */
 
 use Illuminate\Http\Client\RequestException;
 use Illuminate\Support\Facades\Http;
@@ -24,8 +26,7 @@ it('can get', function () {
     ]);
 
     $metalsApi = new MetalsApi(config('metalsApi'));
-    $rates     = $metalsApi->latest('USD,GBP,JPY,EUR,XAU,XAG,BTC', 'BTC');
-
+    $rates = $metalsApi->latest('USD,GBP,JPY,EUR,XAU,XAG,BTC', 'BTC');
 
     expect($rates['USD'])->toBe(22606.174999998493);
 });

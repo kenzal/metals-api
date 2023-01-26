@@ -1,4 +1,6 @@
-<?php /** @noinspection PhpUnhandledExceptionInspection */
+<?php
+
+/** @noinspection PhpUnhandledExceptionInspection */
 
 use Carbon\Carbon;
 use Illuminate\Http\Client\RequestException;
@@ -7,7 +9,7 @@ use Kenzal\MetalsApi\MetalsApi;
 
 it('can get', function () {
     Http::fake([
-                   '*' => Http::response(/** @lang JSON */ '{
+        '*' => Http::response(/** @lang JSON */ '{
                         "success":true,
                         "fluctuation":true,
                         "start_date":"2018-02-25",
@@ -28,14 +30,13 @@ it('can get', function () {
                             }
                         }
                     }', 200, ['Headers']),
-               ]);
+    ]);
 
     $metalsApi = new MetalsApi(config('metalsApi'));
-    $rates     = $metalsApi->fluctuation(startDate: Carbon::make('2012-05-01'),
-                                         endDate  : Carbon::make('2012-05-03'),
-                                         symbols  : ['USD', 'JPY'],
-                                         base     : 'EUR');
-
+    $rates = $metalsApi->fluctuation(startDate: Carbon::make('2012-05-01'),
+        endDate  : Carbon::make('2012-05-03'),
+        symbols  : ['USD', 'JPY'],
+        base     : 'EUR');
 
     expect($rates)->toHaveKey('USD');
     expect($rates['USD'])->toHaveKey('change_pct');
@@ -48,7 +49,7 @@ it('throws exception on bad bad response', function () {
     $metalsApi = new MetalsApi(config('metalsApi'));
 
     $metalsApi->fluctuation(startDate: Carbon::make('2012-05-01'),
-                            endDate  : Carbon::make('2012-05-03'),
-                            symbols  : ['USD', 'JPY'],
-                            base     : 'EUR');
+        endDate  : Carbon::make('2012-05-03'),
+        symbols  : ['USD', 'JPY'],
+        base     : 'EUR');
 })->throws(RequestException::class);

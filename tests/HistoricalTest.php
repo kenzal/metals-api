@@ -1,4 +1,6 @@
-<?php /** @noinspection PhpUnhandledExceptionInspection */
+<?php
+
+/** @noinspection PhpUnhandledExceptionInspection */
 
 use Carbon\Carbon;
 use Illuminate\Http\Client\RequestException;
@@ -22,8 +24,7 @@ it('can get', function () {
     ]);
 
     $metalsApi = new MetalsApi(config('metalsApi'));
-    $rates     = $metalsApi->historical(Carbon::yesterday());
-
+    $rates = $metalsApi->historical(Carbon::yesterday());
 
     expect($rates['USD'])->toBe(1.636492);
 });

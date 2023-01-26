@@ -1,4 +1,6 @@
-<?php /** @noinspection PhpUnhandledExceptionInspection */
+<?php
+
+/** @noinspection PhpUnhandledExceptionInspection */
 
 use Illuminate\Http\Client\RequestException;
 use Illuminate\Support\Facades\Http;
@@ -24,8 +26,7 @@ it('can get', function () {
     ]);
 
     $metalsApi = new MetalsApi(config('metalsApi'));
-    $result    = $metalsApi->convert(from: 'GBP', to: 'JPY', amount: 25);
-
+    $result = $metalsApi->convert(from: 'GBP', to: 'JPY', amount: 25);
 
     expect($result)->toBe(3724.305775);
 });

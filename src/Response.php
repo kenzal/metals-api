@@ -40,6 +40,7 @@ class Response extends HttpResponse
                 default => new Exceptions\MetalsApiException($this->response)
             };
         }
+
         return null;
     }
 }

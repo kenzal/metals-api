@@ -1,4 +1,6 @@
-<?php /** @noinspection PhpUnhandledExceptionInspection */
+<?php
+
+/** @noinspection PhpUnhandledExceptionInspection */
 
 use Carbon\Carbon;
 use Illuminate\Http\Client\RequestException;
@@ -7,7 +9,7 @@ use Kenzal\MetalsApi\MetalsApi;
 
 it('can get', function () {
     Http::fake([
-                   '*' => Http::response(/** @lang JSON */ '{
+        '*' => Http::response(/** @lang JSON */ '{
             "success": true,
             "timeseries": true,
             "start_date": "2012-05-01",
@@ -25,14 +27,13 @@ it('can get', function () {
                 }
             }
         }', 200, ['Headers']),
-               ]);
+    ]);
 
     $metalsApi = new MetalsApi(config('metalsApi'));
-    $rates     = $metalsApi->timeSeries(startDate: Carbon::make('2012-05-01'),
-                                        endDate  : Carbon::make('2012-05-03'),
-                                        symbol   : 'USD',
-                                        base     : 'EUR');
-
+    $rates = $metalsApi->timeSeries(startDate: Carbon::make('2012-05-01'),
+        endDate  : Carbon::make('2012-05-03'),
+        symbol   : 'USD',
+        base     : 'EUR');
 
     expect($rates)->toHaveKey('2012-05-01');
     expect($rates['2012-05-01'])->toHaveKey('USD');
@@ -45,7 +46,7 @@ it('throws exception on bad bad response', function () {
     $metalsApi = new MetalsApi(config('metalsApi'));
 
     $metalsApi->timeSeries(startDate: Carbon::make('2012-05-01'),
-                           endDate  : Carbon::make('2012-05-03'),
-                           symbol   : 'USD',
-                           base     : 'EUR');
+        endDate  : Carbon::make('2012-05-03'),
+        symbol   : 'USD',
+        base     : 'EUR');
 })->throws(RequestException::class);

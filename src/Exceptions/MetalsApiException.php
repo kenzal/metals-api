@@ -6,5 +6,4 @@ use Illuminate\Http\Client\RequestException;
 
 class MetalsApiException extends RequestException
 {
-
 }

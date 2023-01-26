@@ -1,4 +1,6 @@
-<?php /** @noinspection PhpUnhandledExceptionInspection */
+<?php
+
+/** @noinspection PhpUnhandledExceptionInspection */
 
 use Illuminate\Http\Client\RequestException;
 use Illuminate\Support\Facades\Http;
@@ -31,8 +33,7 @@ it('can get', function () {
     ]);
 
     $metalsApi = new MetalsApi(config('metalsApi'));
-    $symbols   = $metalsApi->symbols();
-
+    $symbols = $metalsApi->symbols();
 
     expect($symbols)->toHaveKey('USD');
 });

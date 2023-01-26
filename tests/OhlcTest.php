@@ -1,4 +1,6 @@
-<?php /** @noinspection PhpUnhandledExceptionInspection */
+<?php
+
+/** @noinspection PhpUnhandledExceptionInspection */
 
 use Carbon\Carbon;
 use Illuminate\Http\Client\RequestException;
@@ -7,9 +9,9 @@ use Kenzal\MetalsApi\MetalsApi;
 
 it('can get', function () {
     Http::fake([
-                   '*' => Http::response(
-                   /** @lang JSON */
-                       '{
+        '*' => Http::response(
+            /** @lang JSON */
+            '{
                                 "success": true,
                                 "timestamp": 1653931700,
                                 "date": "2022-05-20",
@@ -23,12 +25,11 @@ it('can get', function () {
                                 },
                                 "unit": "per ounce"
                             }',
-                       200),
-               ]);
+            200),
+    ]);
 
     $metalsApi = new MetalsApi(config('metalsApi'));
-    $rates     = $metalsApi->OHLC(date: Carbon::make('2022-01-01'), symbol: 'XAU', base: 'USD');
-
+    $rates = $metalsApi->OHLC(date: Carbon::make('2022-01-01'), symbol: 'XAU', base: 'USD');
 
     expect($rates)->toHaveKey('open');
     expect($rates['open'])->toBeFloat();
@@ -38,7 +39,6 @@ it('can get', function () {
     expect($rates['low'])->toBeFloat();
     expect($rates)->toHaveKey('close');
     expect($rates['close'])->toBeFloat();
-
 });
 
 it('throws exception on bad bad response', function () {

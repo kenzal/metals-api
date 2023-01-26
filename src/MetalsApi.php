@@ -1,6 +1,7 @@
 <?php
 
 namespace Kenzal\MetalsApi;
+
 use DateTime;
 use Illuminate\Http\Client\RequestException;
 use Illuminate\Support\Facades\Http;
@@ -18,7 +19,6 @@ class MetalsApi
      * Set config.
      *
      * @param  array  $config
-     *
      * @return $this
      */
     public function setConfig(array $config): self
@@ -38,7 +38,6 @@ class MetalsApi
      * The supplied configs are given priority.
      *
      * @param  array  $config
-     *
      * @return $this
      */
     public function mergeConfig(array $config): self
@@ -59,11 +58,12 @@ class MetalsApi
      */
     public function symbols(): array
     {
-        $url      = $this->buildURL('symbols');
+        $url = $this->buildURL('symbols');
         $response = new Response(Http::get($url));
         if ($response->failed()) {
             throw $response->toException();
         }
+
         return $response->json(null, []);
     }
 
@@ -76,19 +76,21 @@ class MetalsApi
      * @param  string|string[]|null  $symbols  array or comma-separated string of currency codes or metal codes to limit output codes, empty string for all
      * @param  string|null  $base  The three-letter currency code or metal code of your preferred base currency.
      * @return array
+     *
      * @throws RequestException
      */
     public function latest(string|array $symbols = null, string $base = null): array
     {
         $symbols = ($symbols === null) ? $this->config['symbols'] ?? '' : '';
         $symbols = is_array($symbols) ? implode(',', $symbols) : $symbols;
-        $base    = ($base === null) ? $this->config['base'] : '';
+        $base = ($base === null) ? $this->config['base'] : '';
 
-        $url      = $this->buildURL('latest', ['base' => $base, 'symbols' => $symbols]);
+        $url = $this->buildURL('latest', ['base' => $base, 'symbols' => $symbols]);
         $response = Http::get($url);
         if ($response->failed()) {
             throw $response->toException();
         }
+
         return $response->json('rates');
     }
 
@@ -101,19 +103,21 @@ class MetalsApi
      * @param  string|string[]|null  $symbols  array or comma-separated string of currency codes or metal codes to limit output codes, empty string for all
      * @param  string|null  $base  The three-letter currency code or metal code of your preferred base currency.
      * @return array
+     *
      * @throws RequestException
      */
     public function historical(DateTime $date, string|array $symbols = null, string $base = null): array
     {
         $symbols = ($symbols === null) ? $this->config['symbols'] ?? '' : '';
         $symbols = is_array($symbols) ? implode(',', $symbols) : $symbols;
-        $base    = ($base === null) ? $this->config['base'] : '';
+        $base = ($base === null) ? $this->config['base'] : '';
 
-        $url      = $this->buildURL($date->format('Y-m-d'), ['base' => $base, 'symbols' => $symbols]);
+        $url = $this->buildURL($date->format('Y-m-d'), ['base' => $base, 'symbols' => $symbols]);
         $response = Http::get($url);
         if ($response->failed()) {
             throw $response->toException();
         }
+
         return $response->json('rates');
     }
 
@@ -128,22 +132,24 @@ class MetalsApi
      * @param  int|float  $amount  The amount to be converted
      * @param  DateTime|null  $date  Specify a date to use historical rates for this conversion
      * @return float
+     *
      * @throws RequestException
      */
     public function convert(string $from, string $to, int|float $amount, DateTime $date = null): float
     {
-        $url      = $this->buildURL(
+        $url = $this->buildURL(
             'convert',
             [
-                'from'   => $from,
-                'to'     => $to,
+                'from' => $from,
+                'to' => $to,
                 'amount' => $amount,
-                'date'   => $date ? $date->format('Y-m-d') : ''
+                'date' => $date ? $date->format('Y-m-d') : '',
             ]);
         $response = Http::get($url);
         if ($response->failed()) {
             throw $response->toException();
         }
+
         return $response->json('result');
     }
 
@@ -167,24 +173,26 @@ class MetalsApi
      * @param  string  $symbol  The three-letter currency code or metal codes to request
      * @param  string|null  $base  The three-letter currency code or metal code of your preferred base currency.
      * @return array
+     *
      * @throws RequestException
      */
     public function timeSeries(DateTime $startDate, DateTime $endDate, string $symbol, string $base = null): array
     {
         $base = ($base === null) ? $this->config['base'] : '';
 
-        $url      = $this->buildURL(
+        $url = $this->buildURL(
             'timeseries',
             [
-                'base'       => $base,
-                'symbols'    => $symbol,
+                'base' => $base,
+                'symbols' => $symbol,
                 'start_date' => $startDate->format('Y-m-d'),
-                'end_date'   => $endDate->format('Y-m-d')
+                'end_date' => $endDate->format('Y-m-d'),
             ]);
         $response = Http::get($url);
         if ($response->failed()) {
             throw $response->toException();
         }
+
         return $response->json('rates');
     }
 
@@ -202,32 +210,34 @@ class MetalsApi
      * @param  string|null  $base  The three-letter currency code or metal code of your preferred base currency.
      * @param  string|null  $type  weekly, monthly, yearly
      * @return array
+     *
      * @throws RequestException
      */
     public function fluctuation(
-        DateTime     $startDate,
-        DateTime     $endDate,
+        DateTime $startDate,
+        DateTime $endDate,
         string|array $symbols = null,
-        string       $base = null,
-        string       $type = null
+        string $base = null,
+        string $type = null
     ): array {
         $symbols = ($symbols === null) ? $this->config['symbols'] ?? '' : '';
         $symbols = is_array($symbols) ? implode(',', $symbols) : $symbols;
-        $base    = ($base === null) ? $this->config['base'] : '';
+        $base = ($base === null) ? $this->config['base'] : '';
 
-        $url      = $this->buildURL(
+        $url = $this->buildURL(
             'timeseries',
             [
-                'base'       => $base,
-                'symbols'    => $symbols,
+                'base' => $base,
+                'symbols' => $symbols,
                 'start_date' => $startDate->format('Y-m-d'),
-                'end_date'   => $endDate->format('Y-m-d'),
-                'type'       => $type
+                'end_date' => $endDate->format('Y-m-d'),
+                'type' => $type,
             ]);
         $response = Http::get($url);
         if ($response->failed()) {
             throw $response->toException();
         }
+
         return $response->json('rates');
     }
 
@@ -238,20 +248,22 @@ class MetalsApi
      *
      * @param  string|null  $base  The three-letter currency code or metal code of your preferred base currency.
      * @return array
+     *
      * @throws RequestException
      */
     public function carat(string $base = null): array
     {
-        $base     = ($base === null) ? $this->config['base'] : '';
-        $url      = $this->buildURL(
+        $base = ($base === null) ? $this->config['base'] : '';
+        $url = $this->buildURL(
             'carat',
             [
-                'base' => $base
+                'base' => $base,
             ]);
         $response = Http::get($url);
         if ($response->failed()) {
             throw $response->toException();
         }
+
         return $response->json('rates');
     }
 
@@ -266,22 +278,24 @@ class MetalsApi
      * @param  string  $symbol  The three-letter currency code or metal codes to request
      * @param  string|null  $base  The three-letter currency code or metal code of your preferred base currency.
      * @return array
+     *
      * @throws RequestException
      */
     public function lowestHighest(DateTime $date, string $symbol, string $base = null): array
     {
         $base = ($base === null) ? $this->config['base'] : '';
 
-        $url      = $this->buildURL(
+        $url = $this->buildURL(
             "lowest-highest/{$date->format('Y-m-d')}",
             [
-                'base'    => $base,
-                'symbols' => $symbol
+                'base' => $base,
+                'symbols' => $symbol,
             ]);
         $response = Http::get($url);
         if ($response->failed()) {
             throw $response->toException();
         }
+
         return $response->json('rates');
     }
 
@@ -297,46 +311,46 @@ class MetalsApi
      * @param  string  $symbol  The three-letter currency code or metal codes to request
      * @param  string|null  $base  The three-letter currency code or metal code of your preferred base currency.
      * @return array
+     *
      * @throws RequestException
      */
     public function OHLC(DateTime $date, string $symbol, string $base = null): array
     {
         $base = ($base === null) ? $this->config['base'] : '';
 
-        $url      = $this->buildURL(
+        $url = $this->buildURL(
             "open-high-low-close/{$date->format('Y-m-d')}",
             [
-                'base'    => $base,
-                'symbols' => $symbol
+                'base' => $base,
+                'symbols' => $symbol,
             ]);
         $response = Http::get($url);
         if ($response->failed()) {
             throw $response->toException();
         }
+
         return $response->json('rates');
     }
-
 
     protected function buildURL(string $endpoint, array $options = []): string
     {
         $this->config['port'] ??= str_starts_with(strtolower($this->config['host']), 'https://') ? 443 : 80;
-        $base                 = "{$this->config['host']}:{$this->config['port']}/api/{$endpoint}?access_key={$this->config['access_key']}";
+        $base = "{$this->config['host']}:{$this->config['port']}/api/{$endpoint}?access_key={$this->config['access_key']}";
+
         return $options ? "{$base}&".http_build_query($options) : $base;
     }
-
 
     /**
      * Check config for required params.
      */
     protected function validateConfig(): void
     {
-        if (!isset($this->config['access_key'])) {
+        if (! isset($this->config['access_key'])) {
             throw new Exceptions\InvalidConfigException();
         }
 
-        if (!isset($this->config['host'])) {
+        if (! isset($this->config['host'])) {
             throw new Exceptions\InvalidConfigException();
         }
     }
-
 }
