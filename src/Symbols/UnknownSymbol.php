@@ -7,11 +7,12 @@ use Kenzal\MetalsApi\Contracts\SymbolInterface;
 
 class UnknownSymbol implements SymbolInterface
 {
-
     protected string $symbol;
+
     protected string $description;
 
-    public function __construct(string $symbol, string $description){
+    public function __construct(string $symbol, string $description)
+    {
         $this->symbol = $symbol;
         $this->description = $description;
         Log::info('Unknown Symbol', compact('symbol', 'description'));

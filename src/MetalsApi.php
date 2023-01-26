@@ -61,6 +61,7 @@ class MetalsApi
      * The Metals-API API comes with a constantly updated endpoint returning all available currencies.
      *
      * @return SymbolInterface[]
+     *
      * @throws RequestException
      */
     public function symbols(): array
@@ -73,7 +74,7 @@ class MetalsApi
         $symbols = $response->json(null, []);
 
         return array_map(
-            function(string $symbol, string $description) {
+            function (string $symbol, string $description) {
                 return Metal::tryFrom($symbol) ?? Currency::tryFrom($symbol) ?? new UnknownSymbol($symbol, $description);
             },
             array_keys($symbols),
@@ -96,10 +97,10 @@ class MetalsApi
     public function latest(string|array|SymbolInterface $symbols = null, string|SymbolInterface $base = null): array
     {
         $symbols = $this->symbolsToString($symbols);
-        $base    = ($base === null) ? $this->config['base'] : '';
+        $base = ($base === null) ? $this->config['base'] : '';
         $base = $base instanceof SymbolInterface ? $base->getSymbol() : $base;
 
-        $url      = $this->buildURL('latest', ['base' => $base, 'symbols' => $symbols]);
+        $url = $this->buildURL('latest', ['base' => $base, 'symbols' => $symbols]);
         $response = Http::get($url);
         if ($response->failed()) {
             throw $response->toException();
@@ -152,7 +153,7 @@ class MetalsApi
     public function convert(string|SymbolInterface $from, string|SymbolInterface $to, int|float $amount, DateTime $date = null): float
     {
         $from = $from instanceof SymbolInterface ? $from->getSymbol() : $from;
-        $to  = $to instanceof SymbolInterface ? $to->getSymbol() : $to;
+        $to = $to instanceof SymbolInterface ? $to->getSymbol() : $to;
         $url = $this->buildURL(
             'convert',
             [
@@ -372,16 +373,18 @@ class MetalsApi
     protected function symbolsToString(string|array $symbols = null): string
     {
         $symbols = ($symbols === null) ? $this->config['symbols'] ?? '' : '';
+
         return is_array($symbols)
             ? implode(',',
-                      array_map(
-                          fn($symbol) => $symbol instanceof SymbolInterface ? $symbol->getSymbol() : $symbol,
-                          $symbols))
+                array_map(
+                    fn ($symbol) => $symbol instanceof SymbolInterface ? $symbol->getSymbol() : $symbol,
+                    $symbols))
             : $symbols;
     }
 
     /**
      * Check config for required params.
+     *
      * @throws InvalidConfigException
      */
     protected function validateConfig(): void

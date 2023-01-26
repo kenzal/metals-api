@@ -28,7 +28,7 @@ it('can get', function () {
     ]);
 
     $metalsApi = new MetalsApi(config('metalsApi'));
-    $rates = $metalsApi->latest(['USD','GBP',Currency::JPY,'EUR', Metal::XAU,'XAG','BTC'], Currency::BTC);
+    $rates = $metalsApi->latest(['USD', 'GBP', Currency::JPY, 'EUR', Metal::XAU, 'XAG', 'BTC'], Currency::BTC);
 
     expect($rates)->toHaveKey('USD', 22606.174999998493);
     expect($rates)->toHaveKey('JPY', 2935281.092856604);
