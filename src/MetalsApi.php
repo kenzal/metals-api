@@ -10,8 +10,9 @@ class MetalsApi
 {
     protected array $config;
 
-    public function __construct($config)
+    public function __construct($config=null)
     {
+        $config ??= config('metals-api');
         $this->setConfig($config);
     }
 
