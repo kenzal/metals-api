@@ -40,7 +40,7 @@ it('can get', function () {
 });
 
 it('throws exception on bad bad response', function () {
-    Http::fake(['*/latest?*' => Http::response(body: '{"success": false}', status: 400)]);
+    Http::fake(['*' => Http::response(body: '{"success": false}', status: 400)]);
 
     $metalsApi = new MetalsApi(config('metalsApi'));
 
